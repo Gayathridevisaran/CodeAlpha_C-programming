@@ -1,0 +1,116 @@
+#include <iostream>
+#include <fstream>
+#include <filesystem>
+#include <string>
+#include <cstdio>
+namespace fs = std::filesystem;
+void listDirectory(const std::string&path)
+{
+   for(const auto&entry: fs::directory_iterator(path))
+   {
+      std::cout<<entry.path().filename()<<'\n';
+   }
+}
+void viewFile(const std::string&filename)
+{
+   std::ifstream file(filename);
+   if(file.is_open())
+   {
+      std::string line;
+      while(std::getline(file,line))
+      {
+         std::cout<<line<<'\n';
+      }
+      file.clode();
+   }
+   else
+   {
+      std::cerr<<"Unable to open file:"<<filename<<'\n';
+   }
+}
+void createDirectory(const std::string&dirname)
+{
+   if(fs::create_directory(dirname))
+   {
+      std::cout<<"Directory created successfully:"<<dirname<<'\n';
+   }
+   else
+   {
+      std::cerr<<:Failed to create directory:"<<dirname<<'\n';
+   }
+}
+void copyFile(const std::string&source,const std::string&destination)
+{
+   try
+   {
+      fs::copy(source,destination);
+      std::cout<<"File copied successfully from"<<source<<'\n';
+   }
+   catch(const std::exception&e)
+   {
+      std::cerr<<"Error:"<<e.what()<<'\n';
+   }
+}
+void moveFile(const std::string&source, const std::string&destination)
+{
+   try
+   {
+      fs::rename(source,destination);
+      std::cout<<"File moved successfully from"<<source<<"to"<<destination<<'\n';
+   }
+   catch(const std::exception&e)
+   {
+      std::cerr<<"Error:"<<e.what()<<'\n';
+   }
+}
+int main()
+{
+   std::string command;
+   std::cout<<"Welcome to Basic File Manager!\n";
+   while(true)
+   {
+      std::cout<<"Enter a command (list,view<filename>, create<dirname>,copy<source> <destination>,move<source> <destination>,exit):";
+      std::getline(std::cin,command);
+      if(command == "exit")
+      {
+         std::cout<<"exiting...\n";
+         break;
+      }
+      else if(command == "list")
+      {
+         std::string path;
+         std::cout<<"Enter directory path:";
+         std::getline(std::cin,path);
+         listDirectory(path);
+      }
+      else if(command.substr(0,4) == "view")
+      {
+         std::string filename = command.substr(5);
+         viewFile(filename);
+      }
+      else if(command.substr(0,6) == "create")
+      {
+         std::string dirname = command.substr(7);
+         createDirectory(dirname);
+      }
+      else if(command.substr(0,4) == "copy")
+      {
+         std::string source,destination;
+         std::stringstream ss(command.substr(5));
+         ss>>source>>destination;
+         copyFile(source,destination);
+      }
+      else if(command.substr(0,4) == "move")
+      {
+         std::string source,destination;
+         std::stringstream ss(command.substr(5));
+         ss>>source>>destination;
+         moveFile(source,destination);
+      }
+      else
+      {
+         std::cerr<<"Invalid command. Please try again.\n";
+      }
+   }
+   return 0;
+}
